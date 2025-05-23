@@ -12,7 +12,7 @@ params = dict(
     search_field='name', # поля для поиска
     schedule='remote', # формат работы
     page=0, # страница
-    per_page=100, # на каждой странице
+    per_page=100, # строк на каждой странице
 )
 
 def show_vacancy_item(item, item_num):
