@@ -30,9 +30,10 @@ def show_vacancy_item(item, item_num):
         print(')')
     else:
         print()
-    pprint(clean(item['snippet']['requirement']))
-    if item['snippet']['responsibility']:
-        pprint(clean(item['snippet']['responsibility']))
+    snippet=item['snippet']
+    pprint(clean(snippet['requirement']))
+    if snippet['responsibility']:
+        pprint(clean(snippet['responsibility']))
     print(item['employer']['name'] + ': ' + item['alternate_url'])
 
 def clean(title):
