@@ -30,14 +30,19 @@ def show_vacancy_item(item, item_num):
         print(')')
     else:
         print()
-    req = item['snippet']['requirement']
+    pprint(clean(item['snippet']['requirement']))
+    if item['snippet']['responsibility']:
+        pprint(clean(item['snippet']['responsibility']))
+    print(item['employer']['name'] + ': ' + item['alternate_url'])
+
+def clean(title):
+    req = title
     try:
         req = req.replace('<highlighttext>', '')
         req = req.replace('</highlighttext>', '')
     except Exception:
         pass
-    pprint(req)
-    print(item['employer']['name'] + ': ' + item['alternate_url'])
+    return req
 
 def main() -> int:
     """Send requests to hh.ru"""
