@@ -3,16 +3,17 @@
 from requests import get
 from pprint import pprint
 import sys
+from parsers import collect
 
-url_vacancies= 'https://api.hh.ru/vacancies'
+url_vacancies = 'https://api.hh.ru/vacancies'
 
 req_params = dict(
-    area=1, # Москва
-    text='python', # текст поиска
-    search_field='name', # поля для поиска
-    schedule='remote', # формат работы
-    page=0, # страница
-    per_page=100, # строк на каждой странице
+    area=1,  # Москва
+    text='python',  # текст поиска
+    search_field='name',  # поля для поиска
+    schedule='remote',  # формат работы
+    page=0,  # страница
+    per_page=100,  # строк на каждой странице
 )
 
 def show_vacancy_item(item, item_num):
@@ -30,10 +31,10 @@ def show_vacancy_item(item, item_num):
         print(')')
     else:
         print()
-    snippet=item['snippet']
-    pprint(clean(snippet['requirement']))
+    snippet = item['snippet']
+    print(clean(snippet['requirement']))
     if snippet['responsibility']:
-        pprint(clean(snippet['responsibility']))
+        print(clean(snippet['responsibility']))
     print(item['employer']['name'] + ': ' + item['alternate_url'])
 
 def clean(title):
@@ -51,24 +52,33 @@ def get_vacancy_desc(ident):
     if r.status_code != 200:
         pprint(r_data)
         raise RuntimeError("Wrong request")
+    return r_data['description']
 
 def main() -> int:
     """Send requests to hh.ru"""
+    get_stat = False
     if len(sys.argv) > 1:
-        input = sys.argv[1:]
-        if '-a' in input:
-            input.remove('-a')
-            input['search_field'] = None
-        if '-h' in input:
-            input.remove('-h')
+        input_pars = sys.argv[1:]
+        if '-a' in input_pars:
+            input_pars.remove('-a')
+            req_params['search_field'] = None
+        if '-s' in input_pars:
+            input_pars.remove('-s')
+            get_stat = True
+        if '-h' in input_pars:
+            input_pars.remove('-h')
             show_help()
             return 0
-        req_params['text'] = ' '.join(input)
+        req_params['text'] = ' '.join(input_pars)
     else:
         show_help()
         return 1
+
     page = 0
     vacancies = []
+    item_num = 1
+    keys_map = {}
+    total=0
     while True:
         req_params['page'] = page
         r = get(url_vacancies, req_params)
@@ -76,21 +86,36 @@ def main() -> int:
         if r.status_code != 200:
             pprint(r_data)
             return 1
-        if len(r_data['items']) == 0: break
+        data_items = r_data['items']
+        if len(data_items) == 0: break
         if page == 0:
-            print('Total count: %s' % r_data['found'])
+            total=r_data['found']
+            print('Total count: %s' % total)
         page += 1
-        vacancies.extend(r_data['items'])
+        if get_stat:
+            for item in data_items:
+                keys_map = collect(keys_map, get_vacancy_desc(item['id']))
+            vacancies.extend(data_items)
+        else:
+            for item in data_items:
+                show_vacancy_item(item, item_num)
+                print()
+                item_num += 1
 
-    for i, vac_item in enumerate(vacancies):
-        show_vacancy_item(vac_item, i)
+    if get_stat:
+        print('Key words statistics:')
+        print(keys_map)
         print()
+        for i, vac_item in enumerate(vacancies):
+            show_vacancy_item(vac_item, i)
+            print()
     return 0
 
 def show_help():
-    print("Usage: [-a] KEY_WORDS")
+    print("Usage: [-a][-s] WORDS")
     print("-a - search in all fields. Default only in title")
-    print("KEY_WORDS - words to search in vacancy fields")
+    print("-s - make statistics by key words in vacancies")
+    print("WORDS - words to search in vacancy fields")
 
 if __name__ == '__main__':
     sys.exit(main())
