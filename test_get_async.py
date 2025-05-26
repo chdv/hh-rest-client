@@ -1,5 +1,6 @@
-import time
+#!/usr/bin/env python3
 
+import time
 import grequests
 import hh
 import asyncio
