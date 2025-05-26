@@ -4,9 +4,9 @@ from requests import get
 from pprint import pprint
 import sys
 
-url='https://api.hh.ru/vacancies'
+url_vacancies= 'https://api.hh.ru/vacancies'
 
-params = dict(
+req_params = dict(
     area=1, # Москва
     text='python', # текст поиска
     search_field='name', # поля для поиска
@@ -45,6 +45,13 @@ def clean(title):
         pass
     return req
 
+def get_vacancy_desc(ident):
+    r = get(url_vacancies + '/' + ident)
+    r_data = r.json()
+    if r.status_code != 200:
+        pprint(r_data)
+        raise RuntimeError("Wrong request")
+
 def main() -> int:
     """Send requests to hh.ru"""
     if len(sys.argv) > 1:
@@ -56,16 +63,15 @@ def main() -> int:
             input.remove('-h')
             show_help()
             return 0
-
-        params['text'] = ' '.join(input)
+        req_params['text'] = ' '.join(input)
     else:
         show_help()
         return 1
     page = 0
-    item_num = 1
+    vacancies = []
     while True:
-        params['page'] = page
-        r = get(url, params)
+        req_params['page'] = page
+        r = get(url_vacancies, req_params)
         r_data = r.json()
         if r.status_code != 200:
             pprint(r_data)
@@ -74,10 +80,11 @@ def main() -> int:
         if page == 0:
             print('Total count: %s' % r_data['found'])
         page += 1
-        for item in r_data['items']:
-            show_vacancy_item(item, item_num)
-            print()
-            item_num += 1
+        vacancies.extend(r_data['items'])
+
+    for i, vac_item in enumerate(vacancies):
+        show_vacancy_item(vac_item, i)
+        print()
     return 0
 
 def show_help():
