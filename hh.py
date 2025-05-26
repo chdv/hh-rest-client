@@ -47,16 +47,17 @@ def clean(title):
 
 def main() -> int:
     """Send requests to hh.ru"""
-    st = 1
     if len(sys.argv) > 1:
-        if sys.argv[1] == '-a':
-            params['search_field'] = None
-            st += 1
-        if sys.argv[1] == '-h':
+        input = sys.argv[1:]
+        if '-a' in input:
+            input.remove('-a')
+            input['search_field'] = None
+        if '-h' in input:
+            input.remove('-h')
             show_help()
             return 0
-        if len(sys.argv) > st:
-            params['text'] = ' '.join(sys.argv[st:])
+
+        params['text'] = ' '.join(input)
     else:
         show_help()
         return 1
