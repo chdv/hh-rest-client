@@ -2,9 +2,10 @@
 
 Консольный клиент к rest-api сайта hh.ru
 
-Предварительно требуется установленный пакет requests. В ubuntu устанавливается через пакетный менеджер apt
+Предварительно требуется установленный пакеты requests и grequests. В ubuntu устанавливается через пакетный менеджер apt
 ```
 sudo apt install python3-requests
+sudo apt install python3-grequests
 ```
 Если ошибка вида 
 ```
