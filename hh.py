@@ -5,6 +5,7 @@ from requests import get
 from pprint import pprint
 import sys
 from parsers import collect
+import re
 
 url_vacancies = 'https://api.hh.ru/vacancies'
 
@@ -16,6 +17,8 @@ req_params = dict(
     page=0,  # страница
     per_page=10,  # строк на каждой странице
 )
+
+html_tags_re = re.compile('<.*?>')
 
 def show_vacancy_item(item, item_num):
     """ Show vacancy json item"""
@@ -33,19 +36,15 @@ def show_vacancy_item(item, item_num):
     else:
         print()
     snippet = item['snippet']
-    print(clean(snippet['requirement']))
+    if snippet['requirement']:
+        print(clean(snippet['requirement']))
     if snippet['responsibility']:
         print(clean(snippet['responsibility']))
     print(item['employer']['name'] + ': ' + item['alternate_url'])
 
 def clean(title):
-    req = title
-    try:
-        req = req.replace('<highlighttext>', '')
-        req = req.replace('</highlighttext>', '')
-    except Exception:
-        pass
-    return req
+    if title: return re.sub(html_tags_re, ' ', title)
+    return None
 
 def get_vacancy_desc(ident):
     r = get(url_vacancies + '/' + ident)
@@ -121,7 +120,7 @@ def main() -> int:
         print(keys_map)
         print()
         for i, vac_item in enumerate(vacancies):
-            show_vacancy_item(vac_item, i)
+            show_vacancy_item(vac_item, i+1)
             print()
     return 0
 
