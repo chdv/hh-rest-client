@@ -28,6 +28,7 @@ def test_time(func):
     func()
     print(func.__name__ + ': ' + str(time.time() - start))
 
-test_time(g_requests)
-test_time(sync_get)
-test_time(asyncio_get)
+if __name__ == '__main__':
+    test_time(g_requests)
+    test_time(sync_get)
+    test_time(asyncio_get)
