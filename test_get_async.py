@@ -18,11 +18,14 @@ def thread_func(threads, func, args):
     t.start()
     threads.append(t)
 
+def threads_join(threads):
+    for t in threads: t.join()
+
 def thread_get():
     threads = []
     for _id in ids:
         thread_func(threads, hh.get_vacancy_desc, (_id,))
-    for t in threads: t.join()
+    threads_join(threads)
 
 async def async_get():
     for _id in ids:
