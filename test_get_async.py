@@ -13,12 +13,15 @@ def sync_get():
     for _id in ids:
         res = hh.get_vacancy_desc(_id)
 
+def thread_func(threads, func, args):
+    t = threading.Thread(target=func, args=args)
+    t.start()
+    threads.append(t)
+
 def thread_get():
     threads = []
     for _id in ids:
-        t=threading.Thread(target=hh.get_vacancy_desc, args=(_id,))
-        t.start()
-        threads.append(t)
+        thread_func(threads, hh.get_vacancy_desc, (_id,))
     for t in threads: t.join()
 
 async def async_get():
